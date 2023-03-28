@@ -95,6 +95,27 @@ export const AllGiftCards = AsyncHandler(
   }
 );
 
+// Get single gift card in the database:
+export const OneGiftCard = AsyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const Giftcards = await GiftCardModels.findById(req.params.giftcardID);
+
+    if (!Giftcards) {
+      next(
+        new AppError({
+          message: "Couldn't get this gift card",
+          httpcode: HTTPCODES.INTERNAL_SERVER_ERROR,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: `Successfully got this gift cards`,
+      data: Giftcards,
+    });
+  }
+);
+
 // Get all gift card for a particular business:
 export const BusinessGiftCard = AsyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {

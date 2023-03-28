@@ -3,6 +3,7 @@ import {
   AllGiftCards,
   BusinessGiftCard,
   GenerateAGiftCard,
+  OneGiftCard,
   SearchForGiftCard,
 } from "../Controllers/GiftCardControllers";
 
@@ -12,6 +13,7 @@ GiftCardRoutes.route("/generateyourgiftcard/:businessID").post(
   GenerateAGiftCard
 );
 GiftCardRoutes.route("/getallgiftcards").get(AllGiftCards);
+GiftCardRoutes.route("/getonegiftcard/:giftcardID").get(OneGiftCard);
 GiftCardRoutes.route("/businessgiftcard/:businessID").get(BusinessGiftCard);
 GiftCardRoutes.route("/searchforgiftcard").post(SearchForGiftCard);
 

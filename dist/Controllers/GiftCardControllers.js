@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SearchForGiftCard = exports.BusinessGiftCard = exports.AllGiftCards = exports.GenerateAGiftCard = void 0;
+exports.SearchForGiftCard = exports.BusinessGiftCard = exports.OneGiftCard = exports.AllGiftCards = exports.GenerateAGiftCard = void 0;
 const AsyncHandler_1 = require("../Utils/AsyncHandler");
 const AppError_1 = require("../Utils/AppError");
 const GiftCardModels_1 = __importDefault(require("../Models/GiftCardModels"));
@@ -73,6 +73,20 @@ exports.AllGiftCards = (0, AsyncHandler_1.AsyncHandler)((req, res, next) => __aw
     }
     return res.status(200).json({
         message: `Successfully got all ${Giftcards.length} gift cards`,
+        data: Giftcards,
+    });
+}));
+// Get single gift card in the database:
+exports.OneGiftCard = (0, AsyncHandler_1.AsyncHandler)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const Giftcards = yield GiftCardModels_1.default.findById(req.params.giftcardID);
+    if (!Giftcards) {
+        next(new AppError_1.AppError({
+            message: "Couldn't get this gift card",
+            httpcode: AppError_1.HTTPCODES.INTERNAL_SERVER_ERROR,
+        }));
+    }
+    return res.status(200).json({
+        message: `Successfully got this gift cards`,
         data: Giftcards,
     });
 }));
