@@ -273,7 +273,7 @@ export const UserBuyAGiftCardWithATMcard = AsyncHandler(
 export const GetSingleUserHistory = AsyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const SingleUserHistory = await BusinessModels.findById(
-      req.params.businessID
+      req.params.userID
     ).populate({
       path: "Histories",
       options: {

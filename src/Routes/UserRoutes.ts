@@ -1,6 +1,8 @@
 import express from "express";
+import { GetSingleBusinessHistory } from "../Controllers/BusinessControllers";
 import {
   GetSingleUser,
+  GetSingleUserHistory,
   UserBuyAGiftCardWithATMcard,
   UsersLogin,
   UsersRegistration,
@@ -17,6 +19,7 @@ UserRouter.route("/registeruser").post(
   UserRegisterValidation,
   UsersRegistration
 );
+UserRouter.route("/user/:userID/history").get(GetSingleUserHistory);
 UserRouter.route("/loginuser").post(UserLoginValidation, UsersLogin);
 UserRouter.route("/getsingleuser/:userID").get(GetSingleUser);
 UserRouter.route("/buyagiftcard/:userID/:businessID/:giftcardID").post(
