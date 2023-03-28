@@ -268,3 +268,31 @@ export const UserBuyAGiftCardWithATMcard = AsyncHandler(
     }
   }
 );
+
+// Get single Business Account history:
+export const GetSingleUserHistory = AsyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const SingleUserHistory = await BusinessModels.findById(
+      req.params.businessID
+    ).populate({
+      path: "Histories",
+      options: {
+        createdAt: -1,
+      },
+    });
+
+    if (!SingleUserHistory) {
+      next(
+        new AppError({
+          message: "User History not found",
+          httpcode: HTTPCODES.NOT_FOUND,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Successfully got this business account",
+      data: SingleUserHistory,
+    });
+  }
+);

@@ -140,7 +140,7 @@ export const GetSingleBusinessAcount = AsyncHandler(
   }
 );
 
-// Get single Business Account:
+// Get single Business Account history:
 export const GetSingleBusinessHistory = AsyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const SingleBusinessHistory = await BusinessModels.findById(
