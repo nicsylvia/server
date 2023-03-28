@@ -17,8 +17,6 @@ export const GenerateAGiftCard = AsyncHandler(
 
     const GetBusiness = await BusinessModels.findById(req.params.businessID);
 
-    const ALLUSER = await UserModels.findById(req.params.userID);
-
     if (!GetBusiness) {
       next(
         new AppError({
@@ -48,28 +46,29 @@ export const GenerateAGiftCard = AsyncHandler(
     }
 
     if (GetBusiness?.logo) {
-      const GiftCard = await GiftCardModels.create({
-        name: GetBusiness?.name,
-        BrandLogo: GetBusiness?.logo,
-        uniqueID: GetBusiness?.BusinessCode,
-        colour,
-        moneyWorth,
-      });
+      if (moneyWorth > GetBusiness?.Balance) {
+        return res.status(HTTPCODES.BAD_REQUEST).json({
+          message: "Insufficient funds in wallet, please credit!!",
+        });
+      } else {
+        const GiftCard = await GiftCardModels.create({
+          name: GetBusiness?.name,
+          BrandLogo: GetBusiness?.logo,
+          uniqueID: GetBusiness?.BusinessCode,
+          colour,
+          moneyWorth,
+        });
 
-      await ALLUSER?.companyGiftCards.push(
-        new mongoose.Types.ObjectId(GiftCard?._id)
-      );
-      await ALLUSER?.save();
+        await GetBusiness?.giftCard?.push(
+          new mongoose.Types.ObjectId(GiftCard?._id)
+        );
+        GetBusiness?.save();
 
-      await GetBusiness?.giftCard?.push(
-        new mongoose.Types.ObjectId(GiftCard?._id)
-      );
-      GetBusiness?.save();
-
-      return res.status(200).json({
-        message: `A Gift card for ${GetBusiness?.name} with money worth of ${moneyWorth} successfully generated`,
-        data: GiftCard,
-      });
+        return res.status(200).json({
+          message: `A Gift card for ${GetBusiness?.name} with money worth of ${moneyWorth} successfully generated`,
+          data: GiftCard,
+        });
+      }
     }
   }
 );
