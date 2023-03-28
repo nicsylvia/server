@@ -19,6 +19,7 @@ const GiftCardModels_1 = __importDefault(require("../Models/GiftCardModels"));
 const BusinessModels_1 = __importDefault(require("../Models/BusinessModels"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const UserModels_1 = __importDefault(require("../Models/UserModels"));
+const DefaultImg = "https://www.shutterstock.com/image-vector/jewellery-dummy-vector-logo-template-600w-2165228765.jpg";
 // Create a gift card:
 exports.GenerateAGiftCard = (0, AsyncHandler_1.AsyncHandler)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -29,6 +30,12 @@ exports.GenerateAGiftCard = (0, AsyncHandler_1.AsyncHandler)((req, res, next) =>
         next(new AppError_1.AppError({
             message: "Business Account not found",
             httpcode: AppError_1.HTTPCODES.NOT_FOUND,
+        }));
+    }
+    if ((GetBusiness === null || GetBusiness === void 0 ? void 0 : GetBusiness.logo) === DefaultImg) {
+        next(new AppError_1.AppError({
+            message: "Dummy logo not allowed, Please upload a logo for your business first before generating a gift card",
+            httpcode: AppError_1.HTTPCODES.SERVICE_UNAVAILABLE,
         }));
     }
     if (!(GetBusiness === null || GetBusiness === void 0 ? void 0 : GetBusiness.logo)) {

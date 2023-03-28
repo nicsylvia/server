@@ -7,6 +7,9 @@ import BusinessModels from "../Models/BusinessModels";
 import mongoose from "mongoose";
 import UserModels from "../Models/UserModels";
 
+const DefaultImg =
+  "https://www.shutterstock.com/image-vector/jewellery-dummy-vector-logo-template-600w-2165228765.jpg";
+
 // Create a gift card:
 export const GenerateAGiftCard = AsyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -25,6 +28,15 @@ export const GenerateAGiftCard = AsyncHandler(
       );
     }
 
+    if (GetBusiness?.logo === DefaultImg) {
+      next(
+        new AppError({
+          message:
+            "Dummy logo not allowed, Please upload a logo for your business first before generating a gift card",
+          httpcode: HTTPCODES.SERVICE_UNAVAILABLE,
+        })
+      );
+    }
     if (!GetBusiness?.logo) {
       next(
         new AppError({
