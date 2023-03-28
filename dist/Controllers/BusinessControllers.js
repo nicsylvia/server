@@ -24,6 +24,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const HistoryModels_1 = __importDefault(require("../Models/HistoryModels"));
 const EnvironmentVariables_1 = require("../Config/EnvironmentVariables");
 const Cloudinary_1 = __importDefault(require("../Config/Cloudinary"));
+const DefaultImg = "https://www.shutterstock.com/image-vector/jewellery-dummy-vector-logo-template-600w-2165228765.jpg";
 // Users Registration:
 exports.BusinessRegistration = (0, AsyncHandler_1.AsyncHandler)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, email, password, confirmPassword, phoneNumber } = req.body;
@@ -43,6 +44,7 @@ exports.BusinessRegistration = (0, AsyncHandler_1.AsyncHandler)((req, res, next)
         phoneNumber: "+234" + phoneNumber,
         password: hashedPassword,
         confirmPassword: hashedPassword,
+        logo: req.file ? req.file.path : DefaultImg,
         BusinessCode: codename +
             otp_generator_1.default.generate(20, {
                 upperCaseAlphabets: false,

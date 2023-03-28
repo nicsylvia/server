@@ -10,6 +10,8 @@ import mongoose from "mongoose";
 import HistoryModels from "../Models/HistoryModels";
 import { EnvironmentVariables } from "../Config/EnvironmentVariables";
 import cloudinary from "../Config/Cloudinary";
+const DefaultImg =
+  "https://www.shutterstock.com/image-vector/jewellery-dummy-vector-logo-template-600w-2165228765.jpg";
 
 // Users Registration:
 export const BusinessRegistration = AsyncHandler(
@@ -38,6 +40,7 @@ export const BusinessRegistration = AsyncHandler(
       phoneNumber: "+234" + phoneNumber,
       password: hashedPassword,
       confirmPassword: hashedPassword,
+      logo: req.file ? req.file.path : DefaultImg,
       BusinessCode:
         codename +
         otpgenerator.generate(20, {
