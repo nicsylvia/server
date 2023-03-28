@@ -52,6 +52,7 @@ export const GenerateAGiftCard = AsyncHandler(
         });
       } else {
         const GiftCard = await GiftCardModels.create({
+          id: GetBusiness?.id,
           name: GetBusiness?.name,
           BrandLogo: GetBusiness?.logo,
           uniqueID: GetBusiness?.BusinessCode,
