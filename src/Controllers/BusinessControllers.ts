@@ -13,6 +13,29 @@ import cloudinary from "../Config/Cloudinary";
 const DefaultImg =
   "https://www.shutterstock.com/image-vector/jewellery-dummy-vector-logo-template-600w-2165228765.jpg";
 
+import crypto from "crypto";
+
+// Encrypted Key from Kora dashboard
+const encrypt = EnvironmentVariables.Encrypted_key;
+
+// Kora's API that we'll be hiiting on to do pay ins (zenith bank to wallet)
+const urlData = "https://api.korapay.com/merchant/api/v1/charges/card";
+
+// Function to encrypt the payment that will be coming in
+function encryptAES256(encryptionKey: string, paymentData: any) {
+  const iv = crypto.randomBytes(16);
+
+  const cipher = crypto.createCipheriv("aes-256-gcm", encryptionKey, iv);
+  const encrypted = cipher.update(paymentData);
+
+  const ivToHex = iv.toString("hex");
+  const encryptedToHex = Buffer.concat([encrypted, cipher.final()]).toString(
+    "hex"
+  );
+
+  return `${ivToHex}:${encryptedToHex}:${cipher.getAuthTag().toString("hex")}`;
+}
+
 // Users Registration:
 export const BusinessRegistration = AsyncHandler(
   async (req: any, res: Response, next: NextFunction) => {
@@ -118,6 +141,34 @@ export const GetSingleBusinessAcount = AsyncHandler(
 );
 
 // Get single Business Account:
+export const GetSingleBusinessHistory = AsyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const SingleBusinessHistory = await BusinessModels.findById(
+      req.params.businessID
+    ).populate({
+      path: "Histories",
+      options: {
+        createdAt: -1,
+      },
+    });
+
+    if (!SingleBusinessHistory) {
+      next(
+        new AppError({
+          message: "Business History not found",
+          httpcode: HTTPCODES.NOT_FOUND,
+        })
+      );
+    }
+
+    return res.status(200).json({
+      message: "Successfully got this business account",
+      data: SingleBusinessHistory,
+    });
+  }
+);
+
+// Get single Business Account:
 export const GetSingleBusinessCards = AsyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const SingleBusiness = await BusinessModels.findById(req.params.businessID);
@@ -176,6 +227,121 @@ export const UpdateBusinessLogo = AsyncHandler(
   }
 );
 const secret = EnvironmentVariables.Kora_secret_key;
+
+// Business credit their wallet to generate a gift card:
+export const BusinessFundTheirWallet = AsyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const {
+      amount,
+      name,
+      number,
+      cvv,
+      pin,
+      expiry_year,
+      expiry_month,
+      title,
+      description,
+    } = req.body;
+
+    const GenerateTransactionReference = uuid();
+
+    // To get single business
+
+    const Business = await BusinessModels.findById(req.params.businessID);
+
+    if (!Business) {
+      next(
+        new AppError({
+          message: "Invalid Account, Does not exist",
+          httpcode: HTTPCODES.NOT_FOUND,
+        })
+      );
+    }
+
+    if (Business) {
+      // For business to make the payment from their bank to business wallet:
+      const paymentData = {
+        reference: GenerateTransactionReference,
+        card: {
+          name,
+          number,
+          cvv,
+          pin,
+          expiry_year,
+          expiry_month,
+        },
+        amount,
+        currency: "NGN",
+        redirect_url: "https://merchant-redirect-url.com",
+        customer: {
+          name: Business?.name,
+          email: Business?.email,
+        },
+        metadata: {
+          internalRef: "JD-12-67",
+          age: 15,
+          fixed: true,
+        },
+      };
+
+      // To stringify the payment data coming in
+      const stringData = JSON.stringify(paymentData);
+      //The data should be in buffer form according to Kora's pay
+      const bufData = Buffer.from(stringData, "utf-8");
+      const encryptedData = encryptAES256(encrypt, bufData);
+
+      var config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: urlData,
+        headers: {
+          Authorization: `Bearer ${secret}`,
+        },
+        data: {
+          charge_data: `${encryptedData}`,
+        },
+      };
+
+      axios(config)
+        .then(async function (response) {
+          // To update the balance of the business with the amount the business funded from his bank
+          const bal = await BusinessModels.findByIdAndUpdate(Business?._id, {
+            Balance: Number(Business?.Balance) + Number(amount),
+          });
+          // To generate a receipt for the business and a notification
+          const BusinesstransactionHistory = await HistoryModels.create({
+            owner: Business?.name,
+            message: `You credited your wallet with ${amount} from your bank`,
+            transactionReference: GenerateTransactionReference,
+            transactionType: "Credit",
+          });
+
+          Business?.TransactionHistory?.push(
+            new mongoose.Types.ObjectId(BusinesstransactionHistory?._id)
+          );
+          Business.save();
+
+          return res.status(HTTPCODES.OK).json({
+            message: `${Business?.name} credited his wallet with ${amount} from bank`,
+            data: {
+              paymentInfo: BusinesstransactionHistory,
+              paymentData: JSON.parse(JSON.stringify(response.data)),
+              bal,
+            },
+          });
+        })
+        .catch(function (error) {
+          next(
+            new AppError({
+              message: "Transaction failed",
+              httpcode: HTTPCODES.BAD_GATEWAY,
+              name: "Network Error",
+            })
+          );
+        });
+    }
+  }
+);
 
 // Business Transfer the funds they have in their business account to their bank:
 export const CheckOutToBank = AsyncHandler(
