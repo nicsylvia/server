@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { AsyncHandler } from "../Utils/AsyncHandler";
-import cloud from "../Config/cloudinary";
 import bcrypt from "bcrypt";
 import otpgenerator from "otp-generator";
 import { AppError, HTTPCODES } from "../Utils/AppError";
@@ -10,6 +9,7 @@ import axios from "axios";
 import mongoose from "mongoose";
 import HistoryModels from "../Models/HistoryModels";
 import { EnvironmentVariables } from "../Config/EnvironmentVariables";
+import cloudinary from "../Config/Cloudinary";
 
 // Users Registration:
 export const BusinessRegistration = AsyncHandler(
@@ -149,7 +149,7 @@ export const UpdateBusinessLogo = AsyncHandler(
   async (req: any, res: Response, next: NextFunction) => {
     // const { logo } = req.body;
 
-    const CloudImg = await cloud.uploader?.upload(req?.file!.path);
+    const CloudImg = await cloudinary.uploader?.upload(req?.file!.path);
 
     const BusinessLogo = await BusinessModels.findByIdAndUpdate(
       req.params.id,

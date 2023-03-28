@@ -4,7 +4,7 @@ import Joi from "joi";
 
 import { AppError, HTTPCODES } from "../Utils/AppError";
 
-export const validator = (
+export const Validator = (
   schemaName: Joi.ObjectSchema,
   body: object,
   next: NextFunction

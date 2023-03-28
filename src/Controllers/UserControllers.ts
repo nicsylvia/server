@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import UserModels from "../Models/UserModels";
 import { AsyncHandler } from "../Utils/AsyncHandler";
-import Cloud from "../Config/cloudinary";
 import bcrypt from "bcrypt";
 import { AppError, HTTPCODES } from "../Utils/AppError";
 import BusinessModels from "../Models/BusinessModels";

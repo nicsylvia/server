@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { AsyncHandler } from "../Utils/AsyncHandler";
-import Cloud from "../Config/cloudinary";
+import cloudinary from "../Config/Cloudinary";
 import { AppError, HTTPCODES } from "../Utils/AppError";
 import GiftCardModels from "../Models/GiftCardModels";
 import BusinessModels from "../Models/BusinessModels";
